@@ -1,19 +1,17 @@
 .home-container {
-    display: flex;
-  }
-  
-  .content {
-    margin-left: 250px; /* Espaço para a sidebar aberta */
-    flex: 1;
-    padding: 2rem;
-    background-color: #f4f4f4;
-    transition: margin-left 0.3s ease;
-  }
-  
-  .sidebar.closed + .content {
-    margin-left: 60px; /* Espaço para a sidebar fechada */
-  }
-  
-  .main-content {
-    padding: 2rem;
-  }
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f4f4f4;
+  transition: margin-left 0.3s ease;
+  margin-left: 250px;
+}
+
+.sidebar.closed + .content {
+  margin-left: 60px;
+}
