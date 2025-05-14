@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
-import "../styles/Home.css";
+import DeviceList from "../components/DeviceList";
+import "../styles/DevicesPage.css";
 
-function HomePage() {
+function DevicesPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -10,14 +11,13 @@ function HomePage() {
   };
 
   return (
-    <>
+    <div className="devices-page">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-        <div className="content">
-            <h1>Bem-vindo ao CorpSync</h1>
-            <p>Selecione uma opção no menu lateral.</p>
-        </div>
-    </>
+      <div className="content">
+        <DeviceList />
+      </div>
+    </div>
   );
 }
 
-export default HomePage;
+export default DevicesPage;

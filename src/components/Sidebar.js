@@ -1,5 +1,6 @@
 import React from "react";
 import "../styles/Sidebar.css";
+import { Link } from "react-router-dom";
 
 function Sidebar({ isOpen, toggleSidebar }) {
   return (
@@ -10,14 +11,14 @@ function Sidebar({ isOpen, toggleSidebar }) {
         </button>
         <div className="logo-container">
           <img src="/logo.png" alt="CorpSync Logo" className="logo" />
-          {isOpen && <h2 className="sidebar-title">CorpSync</h2>}
+          {isOpen && <li className="sidebar-title"><Link to="/home">CorpSync</Link></li>}
         </div>
       </div>
       {isOpen && (
         <>
           <ul className="menu">
             <li>Dashboard</li>
-            <li>Dispositivos</li>
+            <li><Link to="/devices">Dispositivos</Link></li>
             <li>Histórico</li>
             <li>Configurações</li>
           </ul>
