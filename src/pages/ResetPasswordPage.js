@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../styles/FormLogin.css";
 
 function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -20,18 +21,25 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div className="form-container">
-      <h2>Nova Senha</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="password"
-          placeholder="Nova senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Redefinir senha</button>
-      </form>
+    <div className="login-container">
+      <div className="login-box">
+        <img src="/logo.png" alt="CorpSync Logo" className="logo" />
+        <h1>Nova Senha</h1>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label htmlFor="password">Nova Senha</label>
+            <input
+              type="password"
+              id="password"
+              placeholder="Digite sua nova senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="login-button">Redefinir</button>
+        </form>
+      </div>
     </div>
   );
 }

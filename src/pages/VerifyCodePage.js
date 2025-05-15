@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../styles/FormLogin.css";
 
 function VerifyCodePage() {
   const [code, setCode] = useState("");
@@ -18,18 +19,25 @@ function VerifyCodePage() {
   };
 
   return (
-    <div className="form-container">
-      <h2>Verificar Código</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Digite o código recebido"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          required
-        />
-        <button type="submit">Verificar</button>
-      </form>
+    <div className="login-container">
+      <div className="login-box">
+        <img src="/logo.png" alt="CorpSync Logo" className="logo" />
+        <h1>Verificar Código</h1>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label htmlFor="code">Código</label>
+            <input
+              type="text"
+              id="code"
+              placeholder="Digite o código"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="login-button">Verificar</button>
+        </form>
+      </div>
     </div>
   );
 }
