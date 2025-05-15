@@ -23,6 +23,7 @@ function LoginPage() {
       // Salva o token e usuário no localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      
 
       // Redireciona para home
       navigate("/home");

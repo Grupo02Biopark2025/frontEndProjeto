@@ -37,7 +37,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <div className="sidebar-footer">
             <ul>
               <li>Perfil</li>
-              <li onClick={handleLogout} style={{ cursor: "pointer"}}>
+              <li onClick={handleLogout} style={{ cursor: "pointer" }}>
                 Sair
               </li>
             </ul>

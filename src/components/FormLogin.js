@@ -50,9 +50,10 @@ function LoginForm({ onLogin }) {
               </button>
             </div>
           </div>
-          <a href="#" className="forgot-password">
+          <a href="/forgot-password" className="forgot-password">
             Esqueci a senha
           </a>
+
           <button type="submit" className="login-button">
             Entrar
           </button>
