@@ -1,8 +1,16 @@
 import React from "react";
 import "../styles/Sidebar.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Sidebar({ isOpen, toggleSidebar }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
   return (
     <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
       <div className="sidebar-header">
@@ -11,7 +19,11 @@ function Sidebar({ isOpen, toggleSidebar }) {
         </button>
         <div className="logo-container">
           <img src="/logo.png" alt="CorpSync Logo" className="logo" />
-          {isOpen && <li className="sidebar-title"><Link to="/home">CorpSync</Link></li>}
+          {isOpen && (
+            <li className="sidebar-title">
+              <Link to="/home">CorpSync</Link>
+            </li>
+          )}
         </div>
       </div>
       {isOpen && (
@@ -25,7 +37,9 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <div className="sidebar-footer">
             <ul>
               <li>Perfil</li>
-              <li>Sair</li>
+              <li onClick={handleLogout} style={{ cursor: "pointer"}}>
+                Sair
+              </li>
             </ul>
           </div>
         </>
