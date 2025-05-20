@@ -1,17 +1,40 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoginForm from "../components/FormLogin.js";
+import LoginForm from "../components/FormLogin";
+import axios from "axios";
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (email, password) => {
-    if (email === "admin@corpsync.com" && password === "123456") {
-      setIsAuthenticated(true);
+  const handleLogin = async (email, password) => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        {
+          email,
+          password,
+        }
+      );
+
+      const { token, user } = response.data;
+
+      // Salva o token e usuário no localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      
+
+      // Redireciona para home
       navigate("/home");
-    } else {
-      alert("Credenciais inválidas!");
+    } catch (error) {
+      if (error.response?.data?.error) {
+        alert(error.response.data.error);
+      } else {
+        alert("Erro ao conectar com o servidor.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
