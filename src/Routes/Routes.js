@@ -7,6 +7,7 @@ import DeviceDetailsPage from "../pages/DeviceDetailsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import VerifyCodePage from "../pages/VerifyCodePage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+import DeviceLogsPage from "../pages/DeviceLogsPage";
 
 function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/verify-code" element={<VerifyCodePage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/devices/:id/logs" element={<DeviceLogsPage />} />
     </Routes>
   );
 }
