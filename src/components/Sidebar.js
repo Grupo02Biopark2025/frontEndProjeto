@@ -21,7 +21,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <img src="/logo.png" alt="CorpSync Logo" className="logo" />
           {isOpen && (
             <li className="sidebar-title">
-              <Link to="/home">CorpSync</Link>
+              <Link to="/dashboard">CorpSync</Link>
             </li>
           )}
         </div>
@@ -29,9 +29,10 @@ function Sidebar({ isOpen, toggleSidebar }) {
       {isOpen && (
         <>
           <ul className="menu">
-            <li>Dashboard</li>
+            <li><Link to="/dashboard">Dashboard</Link></li>
             <li><Link to="/devices">Dispositivos</Link></li>
             <li>Histórico</li>
+            <li><Link to="/users">Usuários</Link></li>
             <li>Configurações</li>
           </ul>
           <div className="sidebar-footer">

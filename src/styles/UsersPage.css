@@ -1,0 +1,43 @@
+/* Layout principal da página de usuários */
+.users-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Área de conteúdo */
+.content {
+  flex: 1;
+  transition: margin-left 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Ajustes quando a sidebar está aberta */
+.users-page .sidebar.open + .content {
+  margin-left: 0;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .users-page {
+    flex-direction: column;
+  }
+  
+  .content {
+    margin-left: 0 !important;
+  }
+}
+
+/* Overlay para mobile quando sidebar está aberta */
+@media (max-width: 768px) {
+  .users-page.sidebar-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+  }
+}
