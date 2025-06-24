@@ -17,7 +17,7 @@ function UserList() {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:8090/api/users');
+      const response = await fetch('http://localhost:4040/api/users');
       
       if (response.ok) {
         const data = await response.json();

@@ -149,7 +149,7 @@ function AddUserPage({ showAppBar = true }) {
       console.log('- isAdmin:', userData.isAdmin);
       console.log('- Tem imagem:', !!userData.profileImage);
       
-      const response = await fetch('http://localhost:8090/api/users', {
+      const response = await fetch('http://localhost:4040/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

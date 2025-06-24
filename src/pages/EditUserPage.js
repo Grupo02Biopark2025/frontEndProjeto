@@ -50,7 +50,7 @@ function EditUserPage() {
   const fetchUserData = async (userId) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8090/api/users/${userId}`);
+      const response = await fetch(`http://localhost:4040/api/users/${userId}`);
       if (response.ok) {
         const user = await response.json();
         initializeForm(user);
@@ -188,7 +188,7 @@ function EditUserPage() {
       
       console.log('Enviando dados:', userData);
       
-      const response = await fetch(`http://localhost:8090/api/users/${id}`, {
+      const response = await fetch(`http://localhost:4040/api/users/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -28,7 +28,7 @@ function UserDetailPage() {
     
     try {
       console.log('Buscando detalhes do usuário:', userId);
-      const response = await fetch(`http://localhost:8090/api/users/${userId}`);
+      const response = await fetch(`http://localhost:4040/api/users/${userId}`);
       
       if (response.ok) {
         const userData = await response.json();
@@ -60,7 +60,7 @@ function UserDetailPage() {
     
     setDeleting(true);
     try {
-      const response = await fetch(`http://localhost:8090/api/users/${user.id}`, {
+      const response = await fetch(`http://localhost:4040/api/users/${user.id}`, {
         method: 'DELETE',
       });
 

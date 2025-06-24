@@ -24,7 +24,7 @@ function DeviceLogsPage() {
     
     try {
       console.log('Buscando logs para o device ID:', id);
-      const url = `http://localhost:8090/api/devices/${id}/logs`;
+      const url = `http://localhost:4040/api/devices/${id}/logs`;
       console.log('URL da requisição:', url);
       
       const response = await fetch(url);
@@ -64,7 +64,7 @@ function DeviceLogsPage() {
     try {
       console.log('Buscando info do device:', deviceId);
       // Primeiro tenta buscar por deviceId (campo que identifica o device)
-      let response = await fetch(`http://localhost:8090/api/devices?deviceId=${deviceId}`);
+      let response = await fetch(`http://localhost:4040/api/devices?deviceId=${deviceId}`);
       console.log('Status da resposta device info (por deviceId):', response.status);
       
       if (response.ok) {
@@ -78,7 +78,7 @@ function DeviceLogsPage() {
           setDeviceModel(data.model);
         } else {
           // Se não encontrou por deviceId, tenta pela URL direta
-          response = await fetch(`http://localhost:8090/api/devices/${deviceId}`);
+          response = await fetch(`http://localhost:4040/api/devices/${deviceId}`);
           if (response.ok) {
             const device = await response.json();
             setDeviceModel(device.model || "Dispositivo");

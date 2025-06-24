@@ -28,7 +28,7 @@ function DeviceDetailsPage() {
   const fetchDeviceDetails = async (deviceId) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8090/api/devices/${deviceId}`);
+      const response = await fetch(`http://localhost:4040/api/devices/${deviceId}`);
       if (response.ok) {
         const deviceData = await response.json();
         setDevice(deviceData);
@@ -45,7 +45,7 @@ function DeviceDetailsPage() {
   const fetchLastLog = async (deviceId) => {
     try {
       console.log('Buscando último log para device:', deviceId);
-      const url = `http://localhost:8090/api/devices/${deviceId}/logs`;
+      const url = `http://localhost:4040/api/devices/${deviceId}/logs`;
       console.log('URL da requisição logs:', url);
       
       const response = await fetch(url);

@@ -28,7 +28,7 @@ function DeviceList() {
   const fetchDevices = async (search = "") => {
     setLoading(true);
     try {
-      let url = `http://localhost:8090/api/devices?page=${currentPage}&limit=15`;
+      let url = `http://localhost:4040/api/devices?page=${currentPage}&limit=15`;
       if (search && search.trim() !== "") {
         url += `&search=${search}`;
       }
