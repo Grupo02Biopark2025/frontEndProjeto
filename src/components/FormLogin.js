@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/FormLogin.css";
+import { Eye, EyeOff } from "lucide-react";
 
 function LoginForm({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -46,7 +47,11 @@ function LoginForm({ onLogin }) {
                 className="toggle-password"
                 onClick={togglePasswordVisibility}
               >
-                {passwordVisible ? "👁️‍🗨️" : "👁️"}
+                {passwordVisible ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
               </button>
             </div>
           </div>

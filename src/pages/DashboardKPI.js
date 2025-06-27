@@ -3,41 +3,34 @@ import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList,
 } from "recharts";
-import { MdOutlineAccessTime } from "react-icons/md";
+import { Clock, Wifi, WifiOff, Smartphone, Monitor } from "lucide-react";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-// Nova paleta de cores baseada na imagem
+// Paleta de cores mais elegante
 const COLORS = [
-  "#1e3a8a", // Azul Escuro
-  "#059669", // Verde Escuro  
-  "#10b981", // Verde Médio
-  "#34d399", // Verde Claro
-  "#a7f3d0", // Verde Muito Claro
-  "#0f766e", // Verde Teal
-  "#14b8a6", // Teal Médio
-  "#5eead4", // Teal Claro
-  "#06b6d4"  // Cyan
+  "#2a9d8f", "#264653", "#287271", "#2d5a27", "#6a994e",
+  "#386641", "#7209b7", "#a663cc", "#4361ee", "#7209b7"
 ];
 
-// Função customizada para mostrar nome (quantidade) acima da barra
+// Função customizada para labels das barras
 const renderCustomBarLabel = ({ x, y, width, value, payload }) => {
-  if (!payload) return null;
+  if (!payload || value === 0) return null;
   return (
     <text
       x={x + width / 2}
       y={y - 8}
-      fill="#222"
+      fill="#264653"
       textAnchor="middle"
-      fontSize={14}
-      fontWeight="bold"
+      fontSize={12}
+      fontWeight="600"
     >
-      {(payload.osVersion || "Sem versão") + " (" + value + ")"}
+      {value}
     </text>
   );
 };
 
-// Função para exibir o tempo em "2h 5min" ou "30 min"
+// Função para formatar tempo de tela
 function formatScreenTime(minutes) {
   if (!minutes || minutes < 1) return "0 min";
   const h = Math.floor(minutes / 60);
@@ -47,155 +40,400 @@ function formatScreenTime(minutes) {
   return `${m}min`;
 }
 
+// Componente de Card reutilizável
+const KPICard = ({ title, children, gradient = false, icon: Icon }) => (
+  <div className={`kpi-card ${gradient ? 'gradient' : ''}`}>
+    <div className="card-header">
+      {Icon && <Icon size={24} className="card-icon" />}
+      <h4 className="card-title">{title}</h4>
+    </div>
+    <div className="card-content">
+      {children}
+    </div>
+  </div>
+);
+
+// Componente de Métrica
+const MetricItem = ({ value, label, color, online = false }) => (
+  <div className="metric-item">
+    <div className="metric-indicator">
+      <div 
+        className="indicator-dot" 
+        style={{ backgroundColor: color }}
+      />
+      <span className="metric-value">{value}</span>
+    </div>
+    <span className="metric-label">{label}</span>
+  </div>
+);
+
 function DashboardKPI() {
   const [brands, setBrands] = useState([]);
   const [osVersions, setOsVersions] = useState([]);
   const [averageScreenTime, setAverageScreenTime] = useState(0);
   const [devicesStatus, setDevicesStatus] = useState({ online: 0, offline: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-    fetch(`${API_URL}/api/dashboard/kpi/brands`)
-      .then((res) => res.json())
-      .then(data => { if (isMounted) setBrands(data); });
+    const fetchData = async () => {
+      try {
+        const [brandsRes, osRes, statusRes, timeRes] = await Promise.all([
+          fetch(`${API_URL}/api/dashboard/kpi/brands`),
+          fetch(`${API_URL}/api/dashboard/kpi/os-versions`),
+          fetch(`${API_URL}/api/dashboard/kpi/online-offline`),
+          fetch(`${API_URL}/api/dashboard/kpi/average-screen-time`)
+        ]);
 
-    fetch(`${API_URL}/api/dashboard/kpi/os-versions`)
-      .then((res) => res.json())
-      .then(data => { if (isMounted) setOsVersions(data); });
+        if (isMounted) {
+          setBrands(await brandsRes.json());
+          setOsVersions(await osRes.json());
+          setDevicesStatus(await statusRes.json());
+          setAverageScreenTime(Math.round((await timeRes.json()).averageScreenTime || 0));
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        setLoading(false);
+      }
+    };
 
-    fetch(`${API_URL}/api/dashboard/kpi/online-offline`)
-      .then((res) => res.json())
-      .then(data => { if (isMounted) setDevicesStatus(data); });
-
-    fetch(`${API_URL}/api/dashboard/kpi/average-screen-time`)
-      .then((res) => res.json())
-      .then(data => {
-        if (isMounted) setAverageScreenTime(Math.round(data.averageScreenTime || 0));
-      });
-
+    fetchData();
     return () => { isMounted = false; };
   }, []);
 
-  // Dados do PieChart
   const pieData = brands.map(item => ({
     name: item.brand || "Sem marca",
     value: item._count.brand
   }));
 
-  // Dados para o BarChart
   const barData = osVersions.map(item => ({
     osVersion: item.osVersion || "Sem versão",
     Quantidade: item._count.osVersion
   }));
 
+  const totalDevices = devicesStatus.online + devicesStatus.offline;
+
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>Carregando dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #2A9D8F 0%, #1a6b61 100%)',
-      padding: '24px'
-    }}>
+    <div className="dashboard-container">
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        .dashboard-container {
+          min-height: 100vh;
+          background: linear-gradient(135deg, #2a9d8f 0%, #1e6b5c 100%);
+          padding: 2rem;
+          font-family: 'Inter', sans-serif;
+        }
+        
+        .dashboard-header {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 16px;
+          padding: 2rem;
+          margin-bottom: 2rem;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dashboard-title {
+          margin: 0;
+          font-size: 2rem;
+          font-weight: 700;
+          background: linear-gradient(135deg, #2a9d8f, #264653);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          text-align: center;
+          letter-spacing: -0.5px;
+        }
+        
+        .dashboard-subtitle {
+          text-align: center;
+          color: #6b7280;
+          margin-top: 0.5rem;
+          font-weight: 500;
+        }
+        
+        .kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+        
+        .kpi-card {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 16px;
+          padding: 1.5rem;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .kpi-card.gradient {
+          background: linear-gradient(135deg, #2a9d8f 0%, #1e6b5c 100%);
+          color: white;
+        }
+        
+        .card-header {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 1.5rem;
+        }
+        
+        .card-icon {
+          color: #2a9d8f;
+        }
+        
+        .gradient .card-icon {
+          color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .card-title {
+          margin: 0;
+          font-size: 1.125rem;
+          font-weight: 600;
+          color: #264653;
+        }
+        
+        .gradient .card-title {
+          color: white;
+        }
+        
+        .card-content {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        
+        .metric-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.75rem 0;
+        }
+        
+        .metric-indicator {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+        
+        .indicator-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-value {
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #264653;
+        }
+        
+        .gradient .metric-value {
+          color: white;
+        }
+        
+        .metric-label {
+          font-weight: 500;
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+        
+        .gradient .metric-label {
+          color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .screen-time-display {
+          text-align: center;
+          padding: 2rem 0;
+        }
+        
+        .screen-time-value {
+          font-size: 3rem;
+          font-weight: 800;
+          color: white;
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+        
+        .screen-time-label {
+          color: rgba(255, 255, 255, 0.8);
+          font-weight: 500;
+        }
+        
+        .charts-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+          gap: 2rem;
+        }
+        
+        .chart-card {
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(10px);
+          border-radius: 16px;
+          padding: 1.5rem;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          transition: all 0.3s ease;
+        }
+        
+        .chart-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chart-title {
+          margin: 0 0 1.5rem 0;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #264653;
+        }
+        
+        .loading-spinner {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          color: white;
+        }
+        
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid rgba(255, 255, 255, 0.3);
+          border-top: 4px solid white;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        .summary-stats {
+          display: flex;
+          justify-content: center;
+          gap: 2rem;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+        }
+        
+        .summary-stat {
+          text-align: center;
+        }
+        
+        .summary-stat-value {
+          font-size: 2rem;
+          font-weight: 700;
+          color: white;
+          display: block;
+        }
+        
+        .summary-stat-label {
+          color: white;
+          font-size: 0.875rem;
+          font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+          .dashboard-container {
+            padding: 1rem;
+          }
+          
+          .dashboard-title {
+            font-size: 1.5rem;
+          }
+          
+          .kpi-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .charts-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .chart-card {
+            min-width: unset;
+          }
+        }
+      `}</style>
+
       {/* Header */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: '16px',
-        padding: '24px',
-        marginBottom: '24px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-      }}>
-        <h2 style={{
-          margin: 0,
-          fontSize: '28px',
-          fontWeight: 'bold',
-          background: 'linear-gradient(135deg, #2A9D8F, #1a6b61)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          textAlign: 'center'
-        }}>
-          Dashboard de Indicadores de Performance (KPI)
-        </h2>
+      <div className="dashboard-header">
+        <h1 className="dashboard-title">Dashboard KPI</h1>
+        <p className="dashboard-subtitle">Indicadores de Performance em Tempo Real</p>
       </div>
 
-      {/* Cards KPI */}
-      <div style={{display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap'}}>
-        {/* Card dispositivos online/offline */}
-        <div style={{
-          background: "rgba(255, 255, 255, 0.95)", 
-          padding: 24, 
-          borderRadius: 16,
-          minWidth: 250, 
-          textAlign: "center",
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-          flex: 1
-        }}>
-          <h4 style={{marginBottom: 24, color: '#333', fontSize: '18px', fontWeight: 'bold'}}>
-            Status dos Dispositivos
-          </h4>
-          <div style={{display: "flex", alignItems: "center", marginBottom: 16, justifyContent: "center"}}>
-            <span style={{
-              width: 16, height: 16, borderRadius: "50%",
-              display: "inline-block", background: "#10b981", marginRight: 12
-            }} />
-            <span style={{fontSize: 28, fontWeight: 700, marginRight: 8, color: '#333'}}>
-              {devicesStatus.online}
-            </span>
-            <span style={{color: '#666', fontWeight: '500'}}>Online</span>
-          </div>
-          <div style={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-            <span style={{
-              width: 16, height: 16, borderRadius: "50%",
-              display: "inline-block", background: "#1e3a8a", marginRight: 12
-            }} />
-            <span style={{fontSize: 28, fontWeight: 700, marginRight: 8, color: '#333'}}>
-              {devicesStatus.offline}
-            </span>
-            <span style={{color: '#666', fontWeight: '500'}}>Offline</span>
-          </div>
+      {/* Summary Stats */}
+      <div className="summary-stats">
+        <div className="summary-stat">
+          <span className="summary-stat-value">{totalDevices}</span>
+          <span className="summary-stat-label">Total de Dispositivos</span>
         </div>
+        <div className="summary-stat">
+          <span className="summary-stat-value">{brands.length}</span>
+          <span className="summary-stat-label">Marcas Diferentes</span>
+        </div>
+        <div className="summary-stat">
+          <span className="summary-stat-value">{osVersions.length}</span>
+          <span className="summary-stat-label">Versões do OS</span>
+        </div>
+      </div>
 
-        {/* Card tempo de tela */}
-        <div style={{
-          background: "linear-gradient(135deg, #2A9D8F 0%, #1a6b61 100%)",
-          padding: 24, 
-          borderRadius: 16, 
-          minWidth: 250, 
-          textAlign: "center", 
-          boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-          color: 'white',
-          flex: 1
-        }}>
-          <MdOutlineAccessTime 
-            size={48} 
-            style={{ 
-              marginBottom: 16, 
-              color: "rgba(255,255,255,0.9)",
-              display: 'block',
-              margin: '0 auto 16px auto'
-            }} 
+      {/* KPI Cards */}
+      <div className="kpi-grid">
+        <KPICard title="Status dos Dispositivos" icon={Monitor}>
+          <MetricItem
+            value={devicesStatus.online}
+            label="Online"
+            color="#10b981"
           />
-          <h4 style={{marginBottom: 20, fontWeight: 700, fontSize: '18px'}}>
-            Tempo Médio de Tela
-          </h4>
-          <span style={{fontSize: 42, fontWeight: 800, display: 'block', marginBottom: 8}}>
-            {formatScreenTime(averageScreenTime)}
-          </span>
-          <span style={{opacity: 0.8, fontSize: '14px'}}>por dispositivo</span>
-        </div>
+          <MetricItem
+            value={devicesStatus.offline}
+            label="Offline"
+            color="#ef4444"
+          />
+        </KPICard>
+
+        <KPICard title="Tempo Médio de Tela" gradient={true} icon={Clock}>
+          <div className="screen-time-display">
+            <span className="screen-time-value">
+              {formatScreenTime(averageScreenTime)}
+            </span>
+            <span className="screen-time-label">por dispositivo</span>
+          </div>
+        </KPICard>
       </div>
 
       {/* Charts */}
-      <div style={{display: 'flex', gap: 32, flexWrap: 'wrap'}}>
-        <div style={{
-          flex: 1,
-          minWidth: '400px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '16px',
-          padding: '24px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-        }}>
-          <h4 style={{marginBottom: 20, color: '#333', fontSize: '20px', fontWeight: 'bold'}}>
-            Dispositivos por Marca
-          </h4>
-          <div style={{ width: '100%', height: 350 }}>
+      <div className="charts-grid">
+        <div className="chart-card">
+          <h3 className="chart-title">Dispositivos por Marca</h3>
+          <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <PieChart>
                 <Pie
@@ -204,53 +442,62 @@ function DashboardKPI() {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={120}
-                  innerRadius={50}
-                  label={({name, value}) => `${name}: ${value}`}
+                  outerRadius={130}
+                  innerRadius={60}
+                  paddingAngle={2}
                 >
                   {pieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div style={{
-          flex: 1,
-          minWidth: '400px',
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '16px',
-          padding: '24px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-        }}>
-          <h4 style={{marginBottom: 20, color: '#333', fontSize: '20px', fontWeight: 'bold'}}>
-            Dispositivos por Versão do OS
-          </h4>
-          <div style={{ width: '100%', height: 350 }}>
+        <div className="chart-card">
+          <h3 className="chart-title">Dispositivos por Versão do OS</h3>
+          <div style={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
-              <BarChart data={barData}>
+              <BarChart 
+                data={barData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                <XAxis dataKey="osVersion" stroke="#666" />
-                <YAxis allowDecimals={false} stroke="#666" />
-                <Tooltip />
-                <Legend />
+                <XAxis 
+                  dataKey="osVersion" 
+                  stroke="#6b7280"
+                  fontSize={12}
+                />
+                <YAxis 
+                  allowDecimals={false} 
+                  stroke="#6b7280"
+                  fontSize={12}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
                 <Bar 
                   dataKey="Quantidade" 
-                  fill="url(#colorGradient)"
-                  radius={[4, 4, 0, 0]}
+                  fill="#2a9d8f"
+                  radius={[6, 6, 0, 0]}
                 >
                   <LabelList content={renderCustomBarLabel} />
                 </Bar>
-                <defs>
-                  <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2A9D8F" />
-                    <stop offset="100%" stopColor="#1a6b61" />
-                  </linearGradient>
-                </defs>
               </BarChart>
             </ResponsiveContainer>
           </div>

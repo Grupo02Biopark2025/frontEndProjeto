@@ -26,7 +26,7 @@ function LoginPage() {
       
 
       // Redireciona para home
-      navigate("/home");
+      navigate("/dashboard");
     } catch (error) {
       if (error.response?.data?.error) {
         alert(error.response.data.error);

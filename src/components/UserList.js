@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  RefreshCw, AlertTriangle, Users, UserPlus, Key, CheckCircle,
+  Mail, ArrowRight, Plus, User, Shield
+} from "lucide-react";
 import "../styles/UserList.css";
 
 function UserList() {
@@ -60,7 +64,7 @@ function UserList() {
 
   const getAvatarColor = (index) => {
     const colors = [
-      '#259073',
+      '#2a9d8f',
       '#3b82f6',
       '#8b5cf6',
       '#f97316',
@@ -96,7 +100,9 @@ function UserList() {
     return (
       <div className="user-list-container">
         <div className="error-state">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={64} />
+          </div>
           <h3>Erro ao carregar usuários</h3>
           <p>{error}</p>
           <button className="retry-btn" onClick={refreshData}>
@@ -115,23 +121,23 @@ function UserList() {
           <div className="header-top">
             <h1 className="page-title">Usuários</h1>
             <button className="refresh-button" onClick={refreshData}>
-              🔄
+              <RefreshCw size={20} />
             </button>
           </div>
         </div>
       </div>
 
-      <div className="divider"></div>
-
       {/* Content */}
       <div className="users-content">
         {users.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">👥</div>
+            <div className="empty-icon">
+              <Users size={64} />
+            </div>
             <h3>Nenhum usuário encontrado</h3>
             <p>Adicione o primeiro usuário ao sistema</p>
             <button className="add-user-btn" onClick={navigateToAddUser}>
-              <span className="btn-icon">👤</span>
+              <UserPlus size={18} />
               Adicionar Usuário
             </button>
           </div>
@@ -141,11 +147,11 @@ function UserList() {
             <div className="stats-section">
               <div className="stats-grid">
                 <div className="stat-card">
-                  <div className="stat-icon-container" style={{ backgroundColor: 'rgba(37, 144, 115, 0.1)' }}>
-                    <span className="stat-icon" style={{ color: '#259073' }}>👥</span>
+                  <div className="stat-icon-container" style={{ backgroundColor: 'rgba(42, 157, 143, 0.1)' }}>
+                    <Users size={24} style={{ color: '#2a9d8f' }} />
                   </div>
                   <div className="stat-info">
-                    <div className="stat-value" style={{ color: '#259073' }}>
+                    <div className="stat-value" style={{ color: '#2a9d8f' }}>
                       {stats.totalUsers}
                     </div>
                     <div className="stat-label">Total</div>
@@ -154,7 +160,7 @@ function UserList() {
 
                 <div className="stat-card">
                   <div className="stat-icon-container" style={{ backgroundColor: 'rgba(249, 115, 22, 0.1)' }}>
-                    <span className="stat-icon" style={{ color: '#f97316' }}>🔑</span>
+                    <Shield size={24} style={{ color: '#f97316' }} />
                   </div>
                   <div className="stat-info">
                     <div className="stat-value" style={{ color: '#f97316' }}>
@@ -166,7 +172,7 @@ function UserList() {
 
                 <div className="stat-card">
                   <div className="stat-icon-container" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)' }}>
-                    <span className="stat-icon" style={{ color: '#3b82f6' }}>✅</span>
+                    <CheckCircle size={24} style={{ color: '#3b82f6' }} />
                   </div>
                   <div className="stat-info">
                     <div className="stat-value" style={{ color: '#3b82f6' }}>
@@ -223,14 +229,14 @@ function UserList() {
                           <h3 className="user-name">{user.name || "Usuário"}</h3>
                           {isAdmin && (
                             <div className="admin-badge">
-                              <span className="admin-icon">🔑</span>
+                              <Shield size={12} />
                               <span className="admin-text">Admin</span>
                             </div>
                           )}
                         </div>
 
                         <div className="user-email">
-                          <span className="email-icon">📧</span>
+                          <Mail size={16} />
                           <span className="email-text">
                             {user.email || "email@exemplo.com"}
                           </span>
@@ -247,7 +253,7 @@ function UserList() {
 
                       {/* Arrow */}
                       <div className="arrow-icon">
-                        →
+                        <ArrowRight size={16} />
                       </div>
                     </div>
                   </div>
@@ -261,7 +267,7 @@ function UserList() {
       {/* Floating Action Button */}
       {users.length > 0 && (
         <button className="fab" onClick={navigateToAddUser}>
-          <span className="fab-icon">+</span>
+          <Plus size={24} />
         </button>
       )}
     </div>

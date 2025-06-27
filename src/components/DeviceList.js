@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { 
+  Search, X, Smartphone, Monitor, Laptop, 
+  ChevronUp, ChevronLeft, ChevronRight,
+  HardDrive, Wifi, WifiOff
+} from "lucide-react";
 import "../styles/DeviceList.css";
 
 function DeviceList() {
@@ -81,11 +86,13 @@ function DeviceList() {
   };
 
   const getOSIcon = (os) => {
-    if (!os) return "📱";
-    if (os.toLowerCase().includes('android')) return "🤖";
-    if (os.toLowerCase().includes('ios')) return "📱";
-    if (os.toLowerCase().includes('windows')) return "🪟";
-    return "💻";
+    if (!os) return <Smartphone size={16} />;
+    const osLower = os.toLowerCase();
+    if (osLower.includes('android')) return <Smartphone size={16} />;
+    if (osLower.includes('ios')) return <Smartphone size={16} />;
+    if (osLower.includes('windows')) return <Monitor size={16} />;
+    if (osLower.includes('mac')) return <Laptop size={16} />;
+    return <Monitor size={16} />;
   };
 
   const getAvatarText = (model) => {
@@ -99,7 +106,6 @@ function DeviceList() {
   };
 
   const truncateDeviceId = (deviceId) => {
-    // Converte para string caso seja um número ou outro tipo
     const id = String(deviceId);
     if (!id || id === 'null' || id === 'undefined' || id.length <= 12) {
       return `ID: ${id || 'N/A'}`;
@@ -131,7 +137,7 @@ function DeviceList() {
   const getStorageColor = (percentage) => {
     if (percentage > 0.9) return "#ef4444";
     if (percentage > 0.7) return "#f97316";
-    return "#259073";
+    return "#2a9d8f";
   };
 
   if (loading && devices.length === 0) {
@@ -153,12 +159,13 @@ function DeviceList() {
           <div className="header-top">
             <h1 className="page-title">Dispositivos</h1>
             <button className="search-toggle-btn" onClick={toggleSearch}>
-              {isSearching ? "✕" : "🔍"}
+              {isSearching ? <X size={20} /> : <Search size={20} />}
             </button>
           </div>
           
           {isSearching && (
             <div className="search-container">
+              <Search className="search-icon" size={20} />
               <input
                 type="text"
                 placeholder="Pesquisar por modelo ou SO..."
@@ -176,13 +183,13 @@ function DeviceList() {
         </div>
       </div>
 
-      <div className="divider"></div>
-
       {/* Device List */}
       <div className="devices-content">
         {devices.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">📱</div>
+            <div className="empty-icon">
+              <Smartphone size={64} />
+            </div>
             <h3>Nenhum dispositivo encontrado</h3>
             {isSearching && (
               <p>Tente uma pesquisa diferente</p>
@@ -201,7 +208,7 @@ function DeviceList() {
                     {/* Avatar */}
                     <div className="device-avatar">
                       {getAvatarText(device.model) === "??" ? (
-                        <span className="avatar-icon">📱</span>
+                        <Smartphone size={28} />
                       ) : (
                         <span className="avatar-text">
                           {getAvatarText(device.model)}
@@ -213,11 +220,14 @@ function DeviceList() {
                     <div className="device-info">
                       <div className="device-header-row">
                         <h3 className="device-model">{device.model || "Modelo desconhecido"}</h3>
-                        <span className="status-badge online">Online</span>
+                        <span className="status-badge online">
+                          <Wifi size={12} />
+                          Online
+                        </span>
                       </div>
 
                       <div className="device-os">
-                        <span className="os-icon">{getOSIcon(device.os)}</span>
+                        {getOSIcon(device.os)}
                         <span className="os-text">
                           {device.os || "Desconhecido"} {device.osVersion || ""}
                         </span>
@@ -225,6 +235,7 @@ function DeviceList() {
 
                       {/* Storage Bar */}
                       <div className="storage-info">
+                        <HardDrive size={14} />
                         <div className="storage-bar">
                           <div
                             className="storage-fill"
@@ -256,7 +267,8 @@ function DeviceList() {
                   onClick={handlePreviousPage}
                   disabled={currentPage === 1}
                 >
-                  ← Anterior
+                  <ChevronLeft size={16} />
+                  Anterior
                 </button>
                 <span className="pagination-info">
                   Página {currentPage} de {totalPages}
@@ -266,7 +278,8 @@ function DeviceList() {
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
                 >
-                  Próxima →
+                  Próxima
+                  <ChevronRight size={16} />
                 </button>
               </div>
             )}
@@ -277,7 +290,7 @@ function DeviceList() {
       {/* Scroll to Top Button */}
       {showScrollToTop && (
         <button className="scroll-to-top" onClick={scrollToTop}>
-          ↑
+          <ChevronUp size={20} />
         </button>
       )}
 

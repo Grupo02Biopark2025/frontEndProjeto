@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import {
+  ArrowLeft, RefreshCw, Smartphone, Battery, BatteryLow, BatteryWarning,
+  HardDrive, Wifi, Smartphone as Mobile, WifiOff, Globe, Activity,
+  Clock, AlertTriangle, Eye, Navigation, MapPin, Zap, Signal
+} from "lucide-react";
 import "../styles/DeviceDetailsPage.css";
 
 function DeviceDetailsPage() {
@@ -15,11 +20,9 @@ function DeviceDetailsPage() {
 
   useEffect(() => {
     if (!device && id) {
-      // Se não temos device no state, buscar pela API
       fetchDeviceDetails(id);
     }
     if (device?.deviceId || device?.id || id) {
-      // Usar deviceId se disponível, senão id
       const deviceIdentifier = device?.deviceId || device?.id || id;
       fetchLastLog(deviceIdentifier);
     }
@@ -46,26 +49,15 @@ function DeviceDetailsPage() {
     try {
       console.log('Buscando último log para device:', deviceId);
       const url = `http://localhost:4040/api/devices/${deviceId}/logs`;
-      console.log('URL da requisição logs:', url);
-      
       const response = await fetch(url);
-      console.log('Status da resposta logs:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Dados de logs recebidos:', data);
-        console.log('Total de logs:', data.logs?.length || 0);
-        
         if (data.logs && data.logs.length > 0) {
-          console.log('Primeiro log (mais recente):', data.logs[0]);
           setLastLog(data.logs[0]);
         } else {
-          console.log('Nenhum log encontrado');
           setLastLog(null);
         }
-      } else {
-        const errorText = await response.text();
-        console.error('Erro ao buscar logs:', response.status, errorText);
       }
     } catch (err) {
       console.error("Erro ao buscar último log:", err);
@@ -82,9 +74,12 @@ function DeviceDetailsPage() {
     }
   };
 
-  const getBatteryIcon = (state) => {
-    if (state?.toLowerCase().includes('charging')) return "🔋";
-    return "🔋";
+  const getBatteryIcon = (level, state) => {
+    const isCharging = state?.toLowerCase().includes('charging');
+    if (isCharging) return <Zap size={20} />;
+    if (level < 20) return <BatteryLow size={20} />;
+    if (level < 50) return <BatteryWarning size={20} />;
+    return <Battery size={20} />;
   };
 
   const getBatteryColor = (level) => {
@@ -96,15 +91,15 @@ function DeviceDetailsPage() {
   const getStorageColor = (percentage) => {
     if (percentage > 90) return "#ef4444";
     if (percentage > 70) return "#f97316";
-    return "#259073";
+    return "#2a9d8f";
   };
 
   const getConnectionIcon = (type) => {
     switch (type?.toLowerCase()) {
-      case 'wifi': return "📶";
-      case 'mobile': return "📱";
-      case 'none': return "📵";
-      default: return "🌐";
+      case 'wifi': return <Wifi size={20} />;
+      case 'mobile': return <Mobile size={20} />;
+      case 'none': return <WifiOff size={20} />;
+      default: return <Globe size={20} />;
     }
   };
 
@@ -162,7 +157,9 @@ function DeviceDetailsPage() {
     return (
       <div className="device-details-container">
         <div className="error-state">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={64} />
+          </div>
           <h3>Erro ao carregar dispositivo</h3>
           <p>{error || "Dispositivo não encontrado"}</p>
           <button className="retry-btn" onClick={() => navigate(-1)}>
@@ -178,11 +175,12 @@ function DeviceDetailsPage() {
       {/* Header */}
       <div className="details-header">
         <button className="back-button" onClick={() => navigate(-1)}>
-          ← Voltar
+          <ArrowLeft size={18} />
+          Voltar
         </button>
         <h1 className="page-title">Detalhes do Dispositivo</h1>
         <button className="refresh-button" onClick={refreshData}>
-          🔄
+          <RefreshCw size={18} />
         </button>
       </div>
 
@@ -190,7 +188,9 @@ function DeviceDetailsPage() {
         {/* Device Info Card */}
         <div className="device-info-card">
           <div className="device-info-header">
-            <div className="device-icon">📱</div>
+            <div className="device-icon">
+              <Smartphone size={32} />
+            </div>
             <div className="device-basic-info">
               <h2 className="device-model">{device.model || "Modelo desconhecido"}</h2>
               <p className="device-id">ID: {truncateDeviceId(device.deviceId || device.id)}</p>
@@ -225,7 +225,7 @@ function DeviceDetailsPage() {
             <div className="metrics-grid">
               <div className="metric-card">
                 <div className="metric-icon" style={{ color: getBatteryColor(lastLog.batteryLevel || 0) }}>
-                  {getBatteryIcon(lastLog.batteryState)}
+                  {getBatteryIcon(lastLog.batteryLevel || 0, lastLog.batteryState)}
                 </div>
                 <div className="metric-info">
                   <span className="metric-label">Bateria</span>
@@ -237,7 +237,7 @@ function DeviceDetailsPage() {
 
               <div className="metric-card">
                 <div className="metric-icon" style={{ color: getStorageColor(lastLog.diskUsedPercentage || 0) }}>
-                  💾
+                  <HardDrive size={20} />
                 </div>
                 <div className="metric-info">
                   <span className="metric-label">Armazenamento</span>
@@ -248,7 +248,7 @@ function DeviceDetailsPage() {
               </div>
 
               <div className="metric-card">
-                <div className="metric-icon" style={{ color: "#259073" }}>
+                <div className="metric-icon" style={{ color: "#2a9d8f" }}>
                   {getConnectionIcon(lastLog.connectionType)}
                 </div>
                 <div className="metric-info">
@@ -261,7 +261,7 @@ function DeviceDetailsPage() {
 
               <div className="metric-card">
                 <div className="metric-icon" style={{ color: "#3b82f6" }}>
-                  🏃
+                  <Activity size={20} />
                 </div>
                 <div className="metric-info">
                   <span className="metric-label">Velocidade</span>
@@ -280,9 +280,11 @@ function DeviceDetailsPage() {
             <div className="last-log-card">
               <div className="log-header">
                 <span className="log-timestamp">
+                  <Clock size={16} />
                   {formatTimestamp(lastLog.timestamp)}
                 </span>
                 <div className="sync-badge">
+                  <Signal size={14} />
                   Sync #{lastLog.syncCount || '0'}
                 </div>
               </div>
@@ -293,10 +295,10 @@ function DeviceDetailsPage() {
 
               <div className="log-details">
                 <div className="log-section">
-                  <h4>Bateria</h4>
+                  <h4><Battery size={16} /> Bateria</h4>
                   <div className="battery-info">
                     <span className="battery-icon" style={{ color: getBatteryColor(lastLog.batteryLevel || 0) }}>
-                      {getBatteryIcon(lastLog.batteryState)}
+                      {getBatteryIcon(lastLog.batteryLevel || 0, lastLog.batteryState)}
                     </span>
                     <span className="battery-level" style={{ color: getBatteryColor(lastLog.batteryLevel || 0) }}>
                       {lastLog.batteryLevel || 0}%
@@ -308,7 +310,7 @@ function DeviceDetailsPage() {
                 </div>
 
                 <div className="log-section">
-                  <h4>Armazenamento</h4>
+                  <h4><HardDrive size={16} /> Armazenamento</h4>
                   <div className="storage-details">
                     <div className="storage-row">
                       <span>Espaço livre:</span>
@@ -327,7 +329,7 @@ function DeviceDetailsPage() {
 
                 {lastLog.connectionType && (
                   <div className="log-section">
-                    <h4>Conectividade</h4>
+                    <h4><Wifi size={16} /> Conectividade</h4>
                     <div className="connectivity-details">
                       <div className="connectivity-row">
                         <span>Tipo de conexão:</span>
@@ -345,7 +347,7 @@ function DeviceDetailsPage() {
 
                 {(lastLog.altitude || lastLog.locationAccuracy || lastLog.speed) && (
                   <div className="log-section">
-                    <h4>Informações de Localização</h4>
+                    <h4><MapPin size={16} /> Informações de Localização</h4>
                     <div className="location-details">
                       {lastLog.altitude && (
                         <div className="location-row">
@@ -375,7 +377,9 @@ function DeviceDetailsPage() {
 
         {!lastLog && (
           <div className="no-log-card">
-            <div className="no-log-icon">⏱️</div>
+            <div className="no-log-icon">
+              <Clock size={48} />
+            </div>
             <h3>Nenhum log disponível</h3>
             <p>Este dispositivo ainda não enviou logs de sincronização</p>
           </div>
@@ -390,6 +394,7 @@ function DeviceDetailsPage() {
               navigate(`/devices/${deviceIdentifier}/logs`);
             }}
           >
+            <Eye size={18} />
             Visualizar Todos os Logs
           </button>
         </div>

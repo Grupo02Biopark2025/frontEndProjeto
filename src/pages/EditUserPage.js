@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import {
+  ArrowLeft, Save, Camera, Trash2, User, Mail, Lock, 
+  Eye, EyeOff, Shield, AlertTriangle, Info, Image, 
+  Loader2, X, CheckCircle
+} from "lucide-react";
 import "../styles/EditUserPage.css";
 
 function EditUserPage() {
@@ -238,7 +243,8 @@ function EditUserPage() {
       {/* Header */}
       <div className="edit-header">
         <button className="back-button" onClick={() => navigate(-1)}>
-          ←
+          <ArrowLeft size={18} />
+          Voltar
         </button>
         <h1 className="page-title">Editar Usuário</h1>
         <button 
@@ -246,6 +252,7 @@ function EditUserPage() {
           onClick={handleSubmit}
           disabled={loading}
         >
+          {loading ? <Loader2 size={16} className="spinner-icon" /> : <Save size={16} />}
           {loading ? 'Salvando...' : 'Salvar'}
         </button>
       </div>
@@ -255,7 +262,10 @@ function EditUserPage() {
         <form onSubmit={handleSubmit}>
           {/* Profile Image Section */}
           <div className="form-section">
-            <h3 className="section-title">Foto do Perfil</h3>
+            <h3 className="section-title">
+              <Camera size={20} />
+              Foto do Perfil
+            </h3>
             <div className="profile-image-section">
               <div className="profile-image-container">
                 <div className="profile-image-preview">
@@ -276,7 +286,7 @@ function EditUserPage() {
                     className="camera-button"
                     onClick={() => setShowImagePicker(true)}
                   >
-                    📷
+                    <Camera size={16} />
                   </button>
                 </div>
                 
@@ -286,7 +296,8 @@ function EditUserPage() {
                     className="remove-image-btn"
                     onClick={removeProfileImage}
                   >
-                    🗑️ Remover Foto
+                    <Trash2 size={14} />
+                    Remover Foto
                   </button>
                 )}
               </div>
@@ -295,12 +306,15 @@ function EditUserPage() {
 
           {/* Basic Info Section */}
           <div className="form-section">
-            <h3 className="section-title">Informações Básicas</h3>
+            <h3 className="section-title">
+              <User size={20} />
+              Informações Básicas
+            </h3>
             
             <div className="form-group">
               <label htmlFor="name">Nome completo</label>
               <div className="input-container">
-                <span className="input-icon">👤</span>
+                <User className="input-icon" size={16} />
                 <input
                   type="text"
                   id="name"
@@ -317,7 +331,7 @@ function EditUserPage() {
             <div className="form-group">
               <label htmlFor="email">Email</label>
               <div className="input-container">
-                <span className="input-icon">📧</span>
+                <Mail className="input-icon" size={16} />
                 <input
                   type="email"
                   id="email"
@@ -334,13 +348,20 @@ function EditUserPage() {
 
           {/* Permissions Section */}
           <div className="form-section">
-            <h3 className="section-title">Permissões</h3>
+            <h3 className="section-title">
+              <Shield size={20} />
+              Permissões
+            </h3>
             
             <div className="permission-container">
               <div className="permission-toggle">
                 <div className="permission-info">
                   <div className="permission-icon">
-                    {formData.isAdmin ? '🔑' : '👤'}
+                    {formData.isAdmin ? (
+                      <Shield size={20} style={{ color: '#f97316' }} />
+                    ) : (
+                      <User size={20} style={{ color: '#3b82f6' }} />
+                    )}
                   </div>
                   <div className="permission-text">
                     <h4>Administrador</h4>
@@ -366,7 +387,7 @@ function EditUserPage() {
               
               {formData.isAdmin && (
                 <div className="admin-warning">
-                  <span className="warning-icon">⚠️</span>
+                  <AlertTriangle size={16} />
                   <span>Usuários administradores têm acesso total ao sistema</span>
                 </div>
               )}
@@ -375,12 +396,15 @@ function EditUserPage() {
 
           {/* Security Section */}
           <div className="form-section">
-            <h3 className="section-title">Segurança</h3>
+            <h3 className="section-title">
+              <Lock size={20} />
+              Segurança
+            </h3>
             
             <div className="form-group">
               <label htmlFor="password">Nova senha (opcional)</label>
               <div className="input-container">
-                <span className="input-icon">🔒</span>
+                <Lock className="input-icon" size={16} />
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
@@ -395,14 +419,14 @@ function EditUserPage() {
                   className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
               {errors.password && <span className="error-message">{errors.password}</span>}
             </div>
             
             <div className="security-info">
-              <span className="info-icon">ℹ️</span>
+              <Info size={16} />
               <span>A senha só será alterada se você digitar uma nova senha</span>
             </div>
           </div>
@@ -416,12 +440,13 @@ function EditUserPage() {
             >
               {loading ? (
                 <>
-                  <span className="loading-spinner-small"></span>
+                  <Loader2 size={16} className="spinner-icon" />
                   Salvando...
                 </>
               ) : (
                 <>
-                  💾 Salvar Alterações
+                  <Save size={16} />
+                  Salvar Alterações
                 </>
               )}
             </button>
@@ -432,7 +457,8 @@ function EditUserPage() {
               onClick={() => navigate(-1)}
               disabled={loading}
             >
-              ❌ Cancelar
+              <X size={16} />
+              Cancelar
             </button>
           </div>
         </form>
@@ -455,7 +481,9 @@ function EditUserPage() {
                   setShowImagePicker(false);
                 }}
               >
-                <div className="option-icon">📷</div>
+                <div className="option-icon">
+                  <Camera size={24} />
+                </div>
                 <span>Câmera</span>
               </button>
               
@@ -466,7 +494,9 @@ function EditUserPage() {
                   setShowImagePicker(false);
                 }}
               >
-                <div className="option-icon">🖼️</div>
+                <div className="option-icon">
+                  <Image size={24} />
+                </div>
                 <span>Galeria</span>
               </button>
             </div>

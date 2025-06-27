@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  ArrowLeft, RefreshCw, AlertTriangle, FileText, BarChart3,
+  Battery, BatteryLow, BatteryWarning, Zap, HardDrive,
+  Wifi, Smartphone, WifiOff, Globe, MapPin, Activity,
+  ChevronRight, ChevronDown, Clock, MessageSquare
+} from "lucide-react";
 import "../styles/DeviceLogsPage.css";
 
 function DeviceLogsPage() {
@@ -11,10 +17,10 @@ function DeviceLogsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deviceModel, setDeviceModel] = useState("Dispositivo");
+  const [expandedLogs, setExpandedLogs] = useState(new Set());
 
   useEffect(() => {
     console.log('DeviceLogsPage montado com ID:', id);
-    console.log('Params completo:', { id });
     fetchDeviceLogs();
   }, [id]);
 
@@ -25,31 +31,22 @@ function DeviceLogsPage() {
     try {
       console.log('Buscando logs para o device ID:', id);
       const url = `http://localhost:4040/api/devices/${id}/logs`;
-      console.log('URL da requisição:', url);
-      
       const response = await fetch(url);
-      console.log('Status da resposta:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Dados recebidos:', data);
-        console.log('Logs encontrados:', data.logs?.length || 0);
-        
         setLogs(data.logs || []);
         setPagination(data.pagination || {});
         
-        // Buscar info do device usando o deviceId do primeiro log
+        // Buscar info do device
         if (data.logs && data.logs.length > 0) {
           const deviceId = data.logs[0].deviceId;
-          console.log('Device ID do log:', deviceId);
           fetchDeviceInfo(deviceId);
         } else {
-          // Tentar buscar com o ID da URL mesmo assim
           fetchDeviceInfo(id);
         }
       } else {
         const errorText = await response.text();
-        console.error('Erro na resposta:', response.status, errorText);
         throw new Error(`Erro ${response.status}: ${errorText || 'Falha ao carregar logs do dispositivo'}`);
       }
     } catch (err) {
@@ -62,33 +59,24 @@ function DeviceLogsPage() {
 
   const fetchDeviceInfo = async (deviceId) => {
     try {
-      console.log('Buscando info do device:', deviceId);
-      // Primeiro tenta buscar por deviceId (campo que identifica o device)
       let response = await fetch(`http://localhost:4040/api/devices?deviceId=${deviceId}`);
-      console.log('Status da resposta device info (por deviceId):', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('Device info recebida:', data);
-        
-        // A resposta pode ser um array ou objeto
         if (Array.isArray(data) && data.length > 0) {
           setDeviceModel(data[0].model || "Dispositivo");
         } else if (data.model) {
           setDeviceModel(data.model);
         } else {
-          // Se não encontrou por deviceId, tenta pela URL direta
           response = await fetch(`http://localhost:4040/api/devices/${deviceId}`);
           if (response.ok) {
             const device = await response.json();
             setDeviceModel(device.model || "Dispositivo");
           } else {
-            console.warn('Não foi possível buscar info do device, usando nome padrão');
             setDeviceModel("Dispositivo");
           }
         }
       } else {
-        console.warn('Não foi possível buscar info do device, usando nome padrão');
         setDeviceModel("Dispositivo");
       }
     } catch (err) {
@@ -99,6 +87,16 @@ function DeviceLogsPage() {
 
   const refreshData = () => {
     fetchDeviceLogs();
+  };
+
+  const toggleLogExpansion = (index) => {
+    const newExpanded = new Set(expandedLogs);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
+    setExpandedLogs(newExpanded);
   };
 
   const getBatteryColor = (level) => {
@@ -113,17 +111,20 @@ function DeviceLogsPage() {
     return "#22c55e";
   };
 
-  const getBatteryIcon = (state) => {
-    if (state?.toLowerCase().includes('charging')) return "🔋";
-    return "🔋";
+  const getBatteryIcon = (level, state) => {
+    const isCharging = state?.toLowerCase().includes('charging');
+    if (isCharging) return <Zap size={16} />;
+    if (level < 20) return <BatteryLow size={16} />;
+    if (level < 50) return <BatteryWarning size={16} />;
+    return <Battery size={16} />;
   };
 
   const getConnectionIcon = (type) => {
     switch (type?.toLowerCase()) {
-      case 'wifi': return "📶";
-      case 'mobile': return "📱";
-      case 'none': return "📵";
-      default: return "🌐";
+      case 'wifi': return <Wifi size={16} />;
+      case 'mobile': return <Smartphone size={16} />;
+      case 'none': return <WifiOff size={16} />;
+      default: return <Globe size={16} />;
     }
   };
 
@@ -194,7 +195,9 @@ function DeviceLogsPage() {
     return (
       <div className="device-logs-container">
         <div className="error-state">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={64} />
+          </div>
           <h3>Erro ao carregar logs</h3>
           <p>{error}</p>
           <button className="retry-btn" onClick={refreshData}>
@@ -210,17 +213,20 @@ function DeviceLogsPage() {
       {/* Header */}
       <div className="logs-header">
         <button className="back-button" onClick={() => navigate(-1)}>
-          ← Voltar
+          <ArrowLeft size={18} />
+          Voltar
         </button>
         <h1 className="page-title">Logs - {deviceModel}</h1>
         <button className="refresh-button" onClick={refreshData}>
-          🔄
+          <RefreshCw size={18} />
         </button>
       </div>
 
       {logs.length === 0 ? (
         <div className="empty-logs-state">
-          <div className="empty-icon">📄</div>
+          <div className="empty-icon">
+            <FileText size={64} />
+          </div>
           <h3>Nenhum log encontrado</h3>
           <p>Este dispositivo ainda não enviou logs de sincronização</p>
         </div>
@@ -230,7 +236,9 @@ function DeviceLogsPage() {
           <div className="stats-header">
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-icon" style={{ color: "#3b82f6" }}>📊</div>
+                <div className="stat-icon" style={{ color: "#3b82f6" }}>
+                  <BarChart3 size={20} />
+                </div>
                 <div className="stat-info">
                   <div className="stat-value" style={{ color: "#3b82f6" }}>
                     {stats.totalLogs}
@@ -241,7 +249,7 @@ function DeviceLogsPage() {
 
               <div className="stat-card">
                 <div className="stat-icon" style={{ color: getBatteryColor(Math.round(stats.avgBattery)) }}>
-                  🔋
+                  <Battery size={20} />
                 </div>
                 <div className="stat-info">
                   <div className="stat-value" style={{ color: getBatteryColor(Math.round(stats.avgBattery)) }}>
@@ -252,11 +260,11 @@ function DeviceLogsPage() {
               </div>
 
               <div className="stat-card">
-                <div className="stat-icon" style={{ color: "#259073" }}>
+                <div className="stat-icon" style={{ color: "#2a9d8f" }}>
                   {getConnectionIcon(stats.connectionType)}
                 </div>
                 <div className="stat-info">
-                  <div className="stat-value" style={{ color: "#259073" }}>
+                  <div className="stat-value" style={{ color: "#2a9d8f" }}>
                     {formatConnectionType(stats.connectionType)}
                   </div>
                   <div className="stat-label">Conexão</div>
@@ -274,6 +282,7 @@ function DeviceLogsPage() {
                 const speed = toDouble(log.speed);
                 let latitude = toDouble(log.latitude);
                 let longitude = toDouble(log.longitude);
+                const isExpanded = expandedLogs.has(index);
 
                 // Corrigir coordenadas se necessário
                 if (Math.abs(latitude) > 1000) latitude = latitude / 1000000;
@@ -281,18 +290,19 @@ function DeviceLogsPage() {
 
                 return (
                   <div key={index} className="log-card">
-                    <div className="log-card-header">
+                    <div className="log-card-header" onClick={() => toggleLogExpansion(index)}>
                       <div className="log-number">
                         #{log.syncCount || index + 1}
                       </div>
                       <div className="log-main-info">
                         <h4 className="log-timestamp">
+                          <Clock size={16} />
                           {formatTimestamp(log.timestamp)}
                         </h4>
                         <div className="log-quick-stats">
                           <div className="quick-stat">
                             <span className="quick-stat-icon" style={{ color: getBatteryColor(batteryLevel) }}>
-                              🔋
+                              {getBatteryIcon(batteryLevel, log.batteryState)}
                             </span>
                             <span className="quick-stat-text" style={{ color: getBatteryColor(batteryLevel) }}>
                               {batteryLevel}%
@@ -300,14 +310,14 @@ function DeviceLogsPage() {
                           </div>
                           <div className="quick-stat">
                             <span className="quick-stat-icon" style={{ color: getStorageColor(diskUsedPercentage) }}>
-                              💾
+                              <HardDrive size={14} />
                             </span>
                             <span className="quick-stat-text" style={{ color: getStorageColor(diskUsedPercentage) }}>
                               {diskUsedPercentage.toFixed(0)}%
                             </span>
                           </div>
                           <div className="quick-stat">
-                            <span className="quick-stat-icon" style={{ color: "#259073" }}>
+                            <span className="quick-stat-icon" style={{ color: "#2a9d8f" }}>
                               {getConnectionIcon(log.connectionType)}
                             </span>
                             <span className="quick-stat-text">
@@ -316,117 +326,123 @@ function DeviceLogsPage() {
                           </div>
                         </div>
                       </div>
-                      <button 
-                        className="expand-button"
-                        onClick={() => {
-                          const card = document.getElementById(`log-details-${index}`);
-                          const button = document.getElementById(`expand-btn-${index}`);
-                          if (card.style.display === 'none' || !card.style.display) {
-                            card.style.display = 'block';
-                            button.textContent = '▼';
-                          } else {
-                            card.style.display = 'none';
-                            button.textContent = '▶';
-                          }
-                        }}
-                        id={`expand-btn-${index}`}
-                      >
-                        ▶
+                      <button className="expand-button">
+                        {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                       </button>
                     </div>
 
-                    <div id={`log-details-${index}`} className="log-details" style={{ display: 'none' }}>
-                      <div className="detail-divider"></div>
-                      
-                      {/* Mensagem */}
-                      <div className="detail-section">
-                        <h5 className="detail-section-title">Mensagem</h5>
-                        <p className="detail-message">{log.message || 'Sem mensagem'}</p>
-                      </div>
-
-                      {/* Bateria */}
-                      <div className="detail-section">
-                        <h5 className="detail-section-title">Bateria</h5>
-                        <div className="battery-details">
-                          <span className="battery-icon" style={{ color: getBatteryColor(batteryLevel) }}>
-                            🔋
-                          </span>
-                          <span className="battery-level" style={{ color: getBatteryColor(batteryLevel) }}>
-                            {batteryLevel}%
-                          </span>
-                          <span className="battery-state">
-                            {formatBatteryState(log.batteryState)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Armazenamento */}
-                      <div className="detail-section">
-                        <h5 className="detail-section-title">Armazenamento</h5>
-                        <div className="storage-details">
-                          <div className="detail-row">
-                            <span>Espaço livre:</span>
-                            <span>{log.freeDiskSpace || 'N/A'}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span>Espaço total:</span>
-                            <span>{log.totalDiskSpace || 'N/A'}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span>Usado:</span>
-                            <span>{diskUsedPercentage.toFixed(1)}%</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Conectividade */}
-                      {log.connectionType && (
+                    {isExpanded && (
+                      <div className="log-details">
+                        <div className="detail-divider"></div>
+                        
+                        {/* Mensagem */}
                         <div className="detail-section">
-                          <h5 className="detail-section-title">Conectividade</h5>
-                          <div className="connectivity-details">
-                            <div className="detail-row">
-                              <span>Tipo:</span>
-                              <span>{formatConnectionType(log.connectionType)}</span>
-                            </div>
-                            {log.wifiName && (
-                              <div className="detail-row">
-                                <span>Wi-Fi:</span>
-                                <span>{log.wifiName}</span>
-                              </div>
-                            )}
-                          </div>
+                          <h5 className="detail-section-title">
+                            <MessageSquare size={16} />
+                            Mensagem
+                          </h5>
+                          <p className="detail-message">{log.message || 'Sem mensagem'}</p>
                         </div>
-                      )}
 
-                      {/* Localização */}
-                      {(latitude !== 0 || longitude !== 0) && (
+                        {/* Bateria */}
                         <div className="detail-section">
-                          <h5 className="detail-section-title">Localização</h5>
-                          <div className="location-details">
+                          <h5 className="detail-section-title">
+                            <Battery size={16} />
+                            Bateria
+                          </h5>
+                          <div className="battery-details">
+                            <span className="battery-icon" style={{ color: getBatteryColor(batteryLevel) }}>
+                              {getBatteryIcon(batteryLevel, log.batteryState)}
+                            </span>
+                            <span className="battery-level" style={{ color: getBatteryColor(batteryLevel) }}>
+                              {batteryLevel}%
+                            </span>
+                            <span className="battery-state">
+                              {formatBatteryState(log.batteryState)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Armazenamento */}
+                        <div className="detail-section">
+                          <h5 className="detail-section-title">
+                            <HardDrive size={16} />
+                            Armazenamento
+                          </h5>
+                          <div className="storage-details">
                             <div className="detail-row">
-                              <span>Coordenadas:</span>
-                              <span>{latitude.toFixed(6)}, {longitude.toFixed(6)}</span>
+                              <span>Espaço livre:</span>
+                              <span>{log.freeDiskSpace || 'N/A'}</span>
                             </div>
-                            {log.altitude && (
-                              <div className="detail-row">
-                                <span>Altitude:</span>
-                                <span>{log.altitude}m</span>
-                              </div>
-                            )}
-                            {log.locationAccuracy && (
-                              <div className="detail-row">
-                                <span>Precisão:</span>
-                                <span>{log.locationAccuracy}m</span>
-                              </div>
-                            )}
                             <div className="detail-row">
-                              <span>Velocidade:</span>
-                              <span>{speed.toFixed(2)} m/s</span>
+                              <span>Espaço total:</span>
+                              <span>{log.totalDiskSpace || 'N/A'}</span>
+                            </div>
+                            <div className="detail-row">
+                              <span>Usado:</span>
+                              <span>{diskUsedPercentage.toFixed(1)}%</span>
                             </div>
                           </div>
                         </div>
-                      )}
-                    </div>
+
+                        {/* Conectividade */}
+                        {log.connectionType && (
+                          <div className="detail-section">
+                            <h5 className="detail-section-title">
+                              <Wifi size={16} />
+                              Conectividade
+                            </h5>
+                            <div className="connectivity-details">
+                              <div className="detail-row">
+                                <span>Tipo:</span>
+                                <span>{formatConnectionType(log.connectionType)}</span>
+                              </div>
+                              {log.wifiName && (
+                                <div className="detail-row">
+                                  <span>Wi-Fi:</span>
+                                  <span>{log.wifiName}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Localização */}
+                        {(latitude !== 0 || longitude !== 0) && (
+                          <div className="detail-section">
+                            <h5 className="detail-section-title">
+                              <MapPin size={16} />
+                              Localização
+                            </h5>
+                            <div className="location-details">
+                              <div className="detail-row">
+                                <span>Coordenadas:</span>
+                                <span>{latitude.toFixed(6)}, {longitude.toFixed(6)}</span>
+                              </div>
+                              {log.altitude && (
+                                <div className="detail-row">
+                                  <span>Altitude:</span>
+                                  <span>{log.altitude}m</span>
+                                </div>
+                              )}
+                              {log.locationAccuracy && (
+                                <div className="detail-row">
+                                  <span>Precisão:</span>
+                                  <span>{log.locationAccuracy}m</span>
+                                </div>
+                              )}
+                              <div className="detail-row">
+                                <span>Velocidade:</span>
+                                <span>
+                                  <Activity size={14} style={{ marginRight: '4px' }} />
+                                  {speed.toFixed(2)} m/s
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

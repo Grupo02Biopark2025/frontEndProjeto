@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import {
+  ArrowLeft, Edit, MoreVertical, RefreshCw, Trash2, AlertTriangle,
+  User, Mail, Hash, CheckCircle, Shield, Lock, LogIn, Clock,
+  Camera, MousePointer, Calendar, Key, Eye, EyeOff
+} from "lucide-react";
 import "../styles/UserDetailPage.css";
 
 function UserDetailPage() {
@@ -13,6 +18,7 @@ function UserDetailPage() {
   const [error, setError] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (!user && id) {
@@ -140,7 +146,9 @@ function UserDetailPage() {
     return (
       <div className="user-detail-container">
         <div className="error-state">
-          <div className="error-icon">⚠️</div>
+          <div className="error-icon">
+            <AlertTriangle size={64} />
+          </div>
           <h3>Erro ao carregar usuário</h3>
           <p>{error || "Usuário não encontrado"}</p>
           <button className="retry-btn" onClick={refreshData}>
@@ -160,25 +168,35 @@ function UserDetailPage() {
       <div className="user-header">
         <div className="header-background">
           <button className="back-button" onClick={() => navigate('/users')}>
-            ←
+            <ArrowLeft size={20} />
           </button>
           
           <div className="header-actions">
             <button className="header-action-btn" onClick={handleEdit}>
-              ✏️
+              <Edit size={16} />
             </button>
             <div className="dropdown">
-              <button className="header-action-btn dropdown-toggle">
-                ⋮
+              <button 
+                className="header-action-btn dropdown-toggle"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <MoreVertical size={16} />
               </button>
-              <div className="dropdown-menu">
-                <button onClick={refreshData}>
-                  🔄 Atualizar
-                </button>
-                <button onClick={() => setShowDeleteModal(true)} className="delete-option">
-                  🗑️ Excluir
-                </button>
-              </div>
+              {dropdownOpen && (
+                <div className="dropdown-menu">
+                  <button onClick={() => { refreshData(); setDropdownOpen(false); }}>
+                    <RefreshCw size={14} />
+                    Atualizar
+                  </button>
+                  <button 
+                    onClick={() => { setShowDeleteModal(true); setDropdownOpen(false); }} 
+                    className="delete-option"
+                  >
+                    <Trash2 size={14} />
+                    Excluir
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -203,7 +221,7 @@ function UserDetailPage() {
               {initials}
             </div>
             <div className="camera-badge">
-              📷
+              <Camera size={16} />
             </div>
           </div>
           
@@ -211,7 +229,7 @@ function UserDetailPage() {
           
           {userIsAdmin && (
             <div className="admin-badge-large">
-              <span className="admin-icon">🔑</span>
+              <Shield size={16} />
               <span>Administrador</span>
             </div>
           )}
@@ -225,8 +243,8 @@ function UserDetailPage() {
           <h3 className="section-title">Informações Básicas</h3>
           <div className="info-items">
             <div className="info-item">
-              <div className="info-icon" style={{ backgroundColor: 'rgba(37, 144, 115, 0.1)' }}>
-                <span style={{ color: '#259073' }}>👤</span>
+              <div className="info-icon" style={{ backgroundColor: 'rgba(42, 157, 143, 0.1)' }}>
+                <User size={20} style={{ color: '#2a9d8f' }} />
               </div>
               <div className="info-content">
                 <span className="info-label">Nome</span>
@@ -235,8 +253,8 @@ function UserDetailPage() {
             </div>
 
             <div className="info-item">
-              <div className="info-icon" style={{ backgroundColor: 'rgba(37, 144, 115, 0.1)' }}>
-                <span style={{ color: '#259073' }}>📧</span>
+              <div className="info-icon" style={{ backgroundColor: 'rgba(42, 157, 143, 0.1)' }}>
+                <Mail size={20} style={{ color: '#2a9d8f' }} />
               </div>
               <div className="info-content">
                 <span className="info-label">Email</span>
@@ -245,8 +263,8 @@ function UserDetailPage() {
             </div>
 
             <div className="info-item">
-              <div className="info-icon" style={{ backgroundColor: 'rgba(37, 144, 115, 0.1)' }}>
-                <span style={{ color: '#259073' }}>🔢</span>
+              <div className="info-icon" style={{ backgroundColor: 'rgba(42, 157, 143, 0.1)' }}>
+                <Hash size={20} style={{ color: '#2a9d8f' }} />
               </div>
               <div className="info-content">
                 <span className="info-label">ID do Usuário</span>
@@ -262,7 +280,7 @@ function UserDetailPage() {
           <div className="info-items">
             <div className="info-item">
               <div className="info-icon" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}>
-                <span style={{ color: '#22c55e' }}>✅</span>
+                <CheckCircle size={20} style={{ color: '#22c55e' }} />
               </div>
               <div className="info-content">
                 <span className="info-label">Status da Conta</span>
@@ -272,9 +290,11 @@ function UserDetailPage() {
 
             <div className="info-item">
               <div className="info-icon" style={{ backgroundColor: userIsAdmin ? 'rgba(249, 115, 22, 0.1)' : 'rgba(59, 130, 246, 0.1)' }}>
-                <span style={{ color: userIsAdmin ? '#f97316' : '#3b82f6' }}>
-                  {userIsAdmin ? '🔑' : '👤'}
-                </span>
+                {userIsAdmin ? (
+                  <Shield size={20} style={{ color: '#f97316' }} />
+                ) : (
+                  <User size={20} style={{ color: '#3b82f6' }} />
+                )}
               </div>
               <div className="info-content">
                 <span className="info-label">Tipo de Usuário</span>
@@ -286,7 +306,7 @@ function UserDetailPage() {
 
             <div className="info-item">
               <div className="info-icon" style={{ backgroundColor: 'rgba(107, 114, 128, 0.1)' }}>
-                <span style={{ color: '#6b7280' }}>🔒</span>
+                <Lock size={20} style={{ color: '#6b7280' }} />
               </div>
               <div className="info-content">
                 <span className="info-label">Últimas Permissões</span>
@@ -302,7 +322,7 @@ function UserDetailPage() {
           <div className="info-items">
             <div className="activity-item">
               <div className="activity-icon">
-                <span>🔐</span>
+                <LogIn size={20} />
               </div>
               <div className="activity-content">
                 <span className="activity-label">Último Login</span>
@@ -312,7 +332,7 @@ function UserDetailPage() {
 
             <div className="activity-item">
               <div className="activity-icon">
-                <span>✏️</span>
+                <Clock size={20} />
               </div>
               <div className="activity-content">
                 <span className="activity-label">Última Atualização</span>
@@ -328,7 +348,7 @@ function UserDetailPage() {
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon" style={{ color: '#3b82f6' }}>
-                🔐
+                <LogIn size={24} />
               </div>
               <div className="stat-value" style={{ color: '#3b82f6' }}>
                 {user.qtdLogins || 0}
@@ -338,7 +358,7 @@ function UserDetailPage() {
 
             <div className="stat-card">
               <div className="stat-icon" style={{ color: '#22c55e' }}>
-                👆
+                <MousePointer size={24} />
               </div>
               <div className="stat-value" style={{ color: '#22c55e' }}>
                 {user.qtdClicks || 0}
@@ -348,7 +368,7 @@ function UserDetailPage() {
 
             <div className="stat-card">
               <div className="stat-icon" style={{ color: '#f97316' }}>
-                📅
+                <Calendar size={24} />
               </div>
               <div className="stat-value" style={{ color: '#f97316' }}>
                 {user.diasNoSistema || 0}
@@ -368,7 +388,7 @@ function UserDetailPage() {
       {/* Bottom Actions */}
       <div className="bottom-actions">
         <button className="action-btn secondary" onClick={handleEdit}>
-          <span className="btn-icon">✏️</span>
+          <Edit size={16} />
           Editar
         </button>
         <button 
@@ -376,9 +396,11 @@ function UserDetailPage() {
           onClick={() => setShowDeleteModal(true)}
           disabled={deleting}
         >
-          <span className="btn-icon">
-            {deleting ? '⏳' : '🗑️'}
-          </span>
+          {deleting ? (
+            <RefreshCw size={16} className="spinner-icon" />
+          ) : (
+            <Trash2 size={16} />
+          )}
           {deleting ? 'Excluindo...' : 'Excluir'}
         </button>
       </div>
@@ -388,7 +410,7 @@ function UserDetailPage() {
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <span className="modal-icon">⚠️</span>
+              <AlertTriangle className="modal-icon" size={24} />
               <h3>Confirmar Exclusão</h3>
             </div>
             <div className="modal-body">
